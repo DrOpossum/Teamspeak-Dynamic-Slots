@@ -1,1 +1,1 @@
-Teamspeak-Dynamic-Slots
+TeamSpeak3-Dynamic-Slots
