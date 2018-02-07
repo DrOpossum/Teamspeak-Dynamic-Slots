@@ -31,9 +31,9 @@ $config = array(
         'Passwort' => "123456", // Query-Passwort
         'Server_Adresse' => "127.0.0.1", // Adresse des Servers
         'Query_Port' => "10011", // Query-Port des Servers (Standard ist 10011)
-        'Mindestwert' => 5, // Mindestwert an Slots der nicht unterschritten wird
+        'Mindestwert' => 10, // Mindestwert an Slots der nicht unterschritten wird
         'Port' => 9987, // Port zur Verbindung
-				'ID' => 1 // Fortlaufene Nummer (nur Intern nötig)
+	'ID' => 1 // Fortlaufene Nummer (einfach immer um 1 erhöhen)
     )
 );
 
@@ -61,58 +61,50 @@ catch(Exception $e) {
 
 $pfad = "speicher/" . $config['ID'] . ".txt";
 
-if (file_exists($pfad)) {
-		echo "";
-} else {
+if (!file_exists($pfad)) {
     echo "Die Datei $pfad existiert nicht <br>";
 		file_put_contents($pfad, "");
 }
 
-	// Berechnet Slots
-		$slots = $ts3_VirtualServer["virtualserver_clientsonline"]-$ts3_VirtualServer["virtualserver_queryclientsonline"];
-    $freie_slots = $ts3_VirtualServer['virtualserver_maxclients'] - $slots;
+// Berechnet Slots
+$slots = $ts3_VirtualServer["virtualserver_clientsonline"]-$ts3_VirtualServer["virtualserver_queryclientsonline"];
+$freie_slots = $ts3_VirtualServer['virtualserver_maxclients'] - $slots;
 
 if ($slots == $ts3_VirtualServer['virtualserver_maxclients']) {
 
-    $neue_slots = $slots + $config['Abstand'];
+    	$neue_slots = $slots + $config['Abstand'];
 
-		$ts3_VirtualServer->modify(array(
-			"virtualserver_maxclients" => $neue_slots,
-		));
-		echo "Slots gesetzt auf " . $neue_slots . " für " . $config['Server_Adresse'] . ":" . $config['Port'];
+	$ts3_VirtualServer->modify(array(
+		"virtualserver_maxclients" => $neue_slots,
+	));
+	echo "Slots gesetzt auf " . $neue_slots . " für " . $config['Server_Adresse'] . ":" . $config['Port'];
 
-		$time = time();
-		$datei = fopen($pfad, "w");
-		fwrite($datei, $time);
-		fclose($datei);
-		echo "<br>Schreibe Zeit in Datei: " . $time . "<br>";
+	$time = time();
+	$datei = fopen($pfad, "w");
+	fwrite($datei, $time);
+	fclose($datei);
+	echo "<br>Schreibe Zeit in Datei: " . $time . "<br>";
 
 } elseif ($freie_slots > $config['Abstand']) {
 
     if ($ts3_VirtualServer['virtualserver_maxclients'] != $config['Mindestwert']){
 
-			$datei = fopen($pfad, "r");
-			$alte_zeit  = fgets($datei, 1000);
-			$time = time();
-			$dif = $time - $alte_zeit;
-			fclose($datei);
+	$datei = fopen($pfad, "r");
+	$alte_zeit  = fgets($datei, 1000);
+	$time = time();
+	$dif = $time - $alte_zeit;
+	fclose($datei);
 
-			if($dif > 86400)
-			{
-				echo "Mehr als 24 Stunden vergangen <br>";
-				$neue_slots = $ts3_VirtualServer['virtualserver_maxclients'] - $config['Abstand'];
-
-				$ts3_VirtualServer->modify(array(
-					"virtualserver_maxclients" => $neue_slots,
-				));
-				echo "Slots gesetzt auf " . $neue_slots . " für " . $config['Server_Adresse'] . ":" . $config['Port'];
-
-			}	else {
-
-			 	echo "Weniger als 24 Stunden vergangen <br>";
-
-			}
-
+	if($dif > 86400){
+		echo "Mehr als 24 Stunden vergangen <br>";
+		$neue_slots = $ts3_VirtualServer['virtualserver_maxclients'] - $config['Abstand'];
+		$ts3_VirtualServer->modify(array(
+			"virtualserver_maxclients" => $neue_slots,
+		));
+		echo "Slots gesetzt auf " . $neue_slots . " für " . $config['Server_Adresse'] . ":" . $config['Port'];
+	} else {
+		echo "Weniger als 24 Stunden vergangen <br>";
+	}
     }
   }
 }
