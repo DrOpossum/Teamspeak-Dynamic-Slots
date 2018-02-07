@@ -47,14 +47,9 @@ require_once ("libraries/TeamSpeak3/TeamSpeak3.php");
 foreach($config as $config) {
 
 try {
-
 	// Verbindet sich zum Server
 	$ts3_VirtualServer = TeamSpeak3::factory("serverquery://" . $config['Login'] . ":" . $config['Passwort'] . "@" . $config['Server_Adresse'] . ":" . $config['Query_Port'] . "/?nickname=" . $config['Nickname'] . "&server_port=" . $config['Port']);
-
-}
-
-catch(Exception $e) {
-
+} catch(Exception $e) {
 	// Gibt eventuelle Verbindungs-Fehler aus
 	echo "Fehler: " . $e . "<br>";
 }
@@ -62,8 +57,8 @@ catch(Exception $e) {
 $pfad = "speicher/" . $config['ID'] . ".txt";
 
 if (!file_exists($pfad)) {
-    echo "Die Datei $pfad existiert nicht <br>";
-		file_put_contents($pfad, "");
+	echo "Die Datei $pfad existiert nicht <br>";
+	file_put_contents($pfad, "");
 }
 
 // Berechnet Slots
